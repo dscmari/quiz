@@ -6,17 +6,32 @@ import Counter from "./Counter"
 export default function Quiz() {
 
     const category = window.localStorage.getItem("key") //get api link respective to category that was chosen
-    const numberQuestions = JSON.parse(localStorage.getItem("numberQuestions")) 
-
-    React.useEffect(() => {
-        fetch(category)
-        .then(res => res.json())
-        .then(data => setAllQuestions(data.results))
-    },[category])
-
+    const numberQuestions = JSON.parse(localStorage.getItem("numberQuestions"))
 
     const [allQuestions, setAllQuestions] = React.useState([]) //fetch data
-    const [index, setIndex] = React.useState(Math.floor(Math.random() * allQuestions.length)) //start with random question
+
+    React.useEffect(() => {
+        if(category === "dbs"){
+            fetch('database_systems_questions.json')
+            .then(res => res.json())
+            .then(data => setAllQuestions(data))
+
+        }
+        else{
+            fetch(category)
+            .then(res => res.json())
+            .then(data => setAllQuestions(data.results))
+        }
+        
+    },[category])
+
+    //random index is set only after allQuestionsArray is filled -> index 0 problem solved
+    React.useEffect(() => {
+        setIndex(Math.floor(Math.random() * allQuestions.length))
+    }, [allQuestions])
+
+   
+    const [index, setIndex] = React.useState(0)
     const [asking, setAsking] = React.useState("")
     const [correctAnswer, setCorrectAnswer] = React.useState("")
     const [showAnswer, setShowAnswer] = React.useState(false)
@@ -28,13 +43,13 @@ export default function Quiz() {
     const [isSaved, setIsSaved] = React.useState(false)
 
     function startQuestion() {
-       
-       
+        console.log('index '+index)
+        console.log('length '+allQuestions.length)
         incrementQuestionCounter()
         setIsClicked(false)
         setPointIsAdded(false)
         setIsSaved(false)
-        
+
         setAsking(allQuestions[index].question)
         setCorrectAnswer(allQuestions[index].correct_answer)
 
@@ -53,12 +68,13 @@ export default function Quiz() {
         if (option === correctAnswer && isClicked === false) {
             incrementPointCounter()
             showAddedPoint()
-            setIsQuestionAnsweredCorrect()
+            questionAnsweredCorrect()
         }
     }
 
-    function setIsQuestionAnsweredCorrect(){
-        setAllQuestions(allQuestions.filter(question => allQuestions.indexOf(question) !== index)) // filter right answer out
+    //called when question is answered correctly
+    function questionAnsweredCorrect(){
+        setAllQuestions(allQuestions.filter(question => allQuestions.indexOf(question) !== index)) // filter right answer out of the questions so it doesnt get asked again
         setIndex(Math.floor(Math.random() * (allQuestions.length - 1))) //highest index is undefined because of reducing array size
     }
 
@@ -77,8 +93,6 @@ export default function Quiz() {
     function restart(){
         window.location.reload(false)
     }
-
- 
 
     function saveHistory(){
         
@@ -125,13 +139,13 @@ export default function Quiz() {
            
             {questionCounter < numberQuestions +1 ?
                 <div className="quiz-container">
-                    {console.log(typeof(numberQuestions))}
                     <Counter questionCounter = {questionCounter} pointCounter={pointCounter} numberQuestions = {numberQuestions}  />
                     <div> {pointIsAdded ? <div className="quiz-add-point">Correct!</div> : ""}</div>
                     {isClicked ? <button className="quiz-new-question-btn" onClick={startQuestion}>{questionCounter === 0 ? "Start" : (questionCounter === numberQuestions ? "Show Results" : "Next" )}</button> : ""}
                     
                     <div className="quiz-asking"><Asking asking={asking} /></div>
                     <div className="quiz-options-container" >{optionsTemp}</div>
+                    {console.log(allQuestions.length)}
                     {allQuestions.length === 0 ? <div><p className="quiz-waiting-message">Please wait. Your questions are loading.</p><div className="loader"></div></div> : ""}
                 </div>
                 
@@ -143,8 +157,6 @@ export default function Quiz() {
                     <button className="save-history-btn" onClick={saveHistory}>Save to History</button>
                     <button className="quiz-restart-btn" onClick={restart}>Restart</button>
                     {isSaved ? <p style={{padding : 20}}>Quiz Results are saved to History</p> : "" }
-                   
-                    
                 </div>
             }
         </div>

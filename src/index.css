@@ -115,6 +115,10 @@ input[type=number] {
   padding: 10px 10px 10px 0;
 }
 
+.rules-list{
+  padding-left: 0px;
+}
+
 
 /*quiz*/
 
@@ -329,16 +333,11 @@ input[type=number] {
   width: 100%;
 }
 
-th{
-
-}
-
 .turn-table {
   width: 100%;
 }
 
-th,
-td {
+th,td {
   border: 1px solid black;
 }
 
@@ -386,5 +385,9 @@ td {
 
   .select-category-title {
     padding: 2rem;
+  }
+
+  .category-options-container{
+    font-size: 20px;
   }
 }
